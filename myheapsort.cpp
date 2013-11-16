@@ -75,6 +75,8 @@ void InsertIntoHeap(int* a, int num, int* heap_size) {
       break;
     }
   }
+
+  a[i] = num;			// save to pos
 }
 
 int main(int, char**) {
