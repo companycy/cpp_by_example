@@ -82,10 +82,31 @@ void InsertIntoHeap(int* a, int num, int* heap_size) {
 int main(int, char**) {
   int a[] = {3, 4, 9, 10, 5, 2, 7};
   int heap_size = sizeof(a)/sizeof(int);
+
+  // test build heap
   Build_Max_Heap(a, heap_size);
   print(a, heap_size);
-  // Heapsort(a, heap_size);
-  
+
+  // test heap sort
+  Heapsort(a, heap_size);
   print(a, heap_size);
+
+  int* b = new int[10];
+  b[0] = 71, b[1] = 19;
+  int b_size = 2;
+  // test insert into heap
+  InsertIntoHeap(b, 81, &b_size);
+  InsertIntoHeap(b, 17, &b_size);
+  InsertIntoHeap(b, 25, &b_size);
+  InsertIntoHeap(b, 5, &b_size);
+  InsertIntoHeap(b, 150, &b_size);
+  print(b, b_size);
+
+  // test delete heap
+  Delete(b, &b_size);
+  Delete(b, &b_size);
+  print(b, b_size);
+
+  delete []b;
   return 0;
 }
