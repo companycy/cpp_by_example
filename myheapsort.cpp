@@ -71,8 +71,7 @@ void InsertIntoHeap(int* a, int num, int* heap_size) {
       a[i] = a[j];
       i = j;
       j = j/2-1;
-    }
-    else {
+    } else {
       break;
     }
   }
