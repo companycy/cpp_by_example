@@ -268,6 +268,200 @@ rb_node* rb_insert(rb_node* root, rb_node* node) {
   rb_insert_fixup(root, node);
 }
 
+
+/*
+  rb_delete(T, z)
+  if left[z] == null || right[z] == null
+      y = z
+  else
+      y = tree_successor(z) // get biggest in left child
+
+  if left[y] != null
+      x = left[y]
+  else
+      x = right[y]
+
+  p[x] = p[y]
+  
+  if p[y] == null
+      root = x
+  else if y == left[p[y]]
+      left[p[y]] = x
+  else
+      right[p[y]] = x
+
+  if y != z
+      key[z] = key[y]
+      copy y's data into z
+
+  if color[y] == BLACK
+      rb_delete_fixup(T, x)
+*/
+
+rb_node* rb_delete(rb_node* root, rb_node* node) {
+  rb_node* left = NULL, *child = NULL, *old = node;
+  int color;
+  if (node->left && node->right) {
+    // tree_successor(z) // get smallest in right child
+    node = node->right;
+    while ((left = node->left) != NULL) {
+      node = left;
+    }
+    child = node->right; // left is already NULL
+    parent = node->parent;
+    color = node->color;
+
+    if (child) {
+      child->parent = parent;
+    }
+
+    if (parent) {
+      if (parent->left == node) {
+	parent->left = child;
+      } else {
+	parent->right = child;
+      }
+    } else {
+      root = child;
+    }
+
+    if (node->parent == old) {	// ??
+      parent = node;
+    }
+
+    node->parent = old->parent;
+    node->color = old->color;
+    node->right = old->right;
+    node->left = old->left;
+
+    if (old->parent) {
+      if (old->parent->left == old) {
+	old->parent->left = node;
+      } else {
+	old->parent->right = node;
+      }
+    } else {
+      root = node;
+    }
+
+    // old->left && old->right are not null!!
+    if (old->left) {
+      old->left->parent= node;
+    }
+    if (old->right) {
+      old->right->parent = node;
+    }
+  } else {
+    // one of node children is null
+    if (!node->left) {
+      child = node->right;
+    } else if (!node->right) {
+      child = node->left;
+    }
+
+    parent = node->parent;
+    color = node->color;
+
+    if (child) {
+      child->parent = parent;
+    }
+    if (parent) {
+      if (parent->left == node) {
+	parent->left = child;
+      } else {
+	parent->right = child;
+      }
+    } else {
+      root = child;
+    }
+  }
+
+  free(old);
+  if (color == BLACK) {
+    root = rb_erase_rebalance(child, parent, root);
+  }
+
+  return root;
+}
+
+/*
+case 3
+           B(Black)                      D(Black)
+          /        \       =>            /      \
+    p->A(Black)   D(Red)              B(Red)   E(Black)
+                  /    \               /  \  
+                 C      E             A p->C
+
+case 4
+           B                        p->B(Red)   
+	 /     \           =>            /    \
+  p->A(Black)  D(Black)             A(Black) D(Red)
+               /    \                         /    \
+             C(B)   E(B)                    C(B)   E(B)
+
+case 5
+          B(Red)                         B(Red)
+         /      \          =>           /      \
+   p->A(Black) D(Black)             A(Black)  C(Black)
+               /     \                             \
+             C(R))   E(B)                         D(Red)
+                                                      \
+						   p->E(Black)
+
+case 6
+         B(Red)                         p->D(Red)
+         /     \            =>            /    \
+  p->A(Black) D(Black)                 B(B)   E(B)
+               /   \                  /   \ 
+             C(R)  E(R)             A(B) C(R)
+
+*/
+rb_node* rb_erase_rebalance(rb_node* node, rb_node* parent, rb_node* root) {
+  rb_node* other, *left, *right;
+  while ((!node||node->color == BLACK) && node != root) { // !node ??
+    if (parent->left == node) {
+      other = parent->right;
+      // case 3
+      if (other->color == RED) {
+	other->color = BLACK;
+	parent->color = RED;
+	left_rotate(parent, root);
+	other = parent->right;
+      }
+      // case 4
+      if ((!other->left || other->left->color == BLACK)
+	  && (!other->right || other->right->color == BLACK)) {
+	other->color = RED;
+	node = parent;
+	parent = node->parent;
+      } else {
+	// case 5
+	if (!other->right || other->right->color == BLACK) {
+	  if (left = other->left) {
+	    left->color = BLACK;
+	  }
+	  other->color = RED;
+	  root = rb_rotate_right(other, root);
+	  other = parent->right;
+	}
+
+	// case 6
+	other->color = parent->color;
+	parent->color = BLACK;
+	if (other->right) {
+	  other->right->color = BLACK;
+	}
+
+	root = rb_rotate_left(parent, root);
+	node = root;
+	break;
+      }
+    } else {			// similar code
+    }
+  }
+}
+
+
 int main(int, char**) {
   return 0;
 }
