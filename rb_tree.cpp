@@ -1,11 +1,15 @@
 #include <cstdio>
 
+const int RED = 0;
+const int BLACK = 1;
 
 struct rb_node {
   unsigned long  __rb_parent_color;
   rb_node *parent;
   rb_node *right;
   rb_node *left;
+  int      key;
+  int      color;
 };
 
 /*
@@ -18,7 +22,7 @@ struct rb_node {
 */
 // for rotate, the sequence is important!!
 // http://blog.csdn.net/v_JULY_v/article/details/6114226
-rb_node* rb_rotate_left(rb_node* node, rb_node* root) {
+rb_node* rb_rotate_left(rb_node* root, rb_node* node) {
   rb_node* right = node->right;	   // remember right
   if (node->right = right->left) { // move b(right's left) to node's right
     right->left->parent = node;
@@ -47,7 +51,7 @@ rb_node* rb_rotate_left(rb_node* node, rb_node* root) {
    a    b                          b    c
 
 */
-rb_node* rb_rotate_right(rb_node* node, rb_node* root) {
+rb_node* rb_rotate_right(rb_node* root, rb_node* node) {
   rb_node* left = node->left;
   if (node->left = left->right) { // mv b(left's right) to node's left
     left->right->parent = node;
@@ -68,6 +72,121 @@ rb_node* rb_rotate_right(rb_node* node, rb_node* root) {
   return root;
 }
 
+// http://blog.csdn.net/v_JULY_v/article/details/6114226
+// code from url uses save last pos searched
+rb_node* rb_search_auxiliary(int key, rb_node* root) {
+  rb_node* node = root, *parent = NULL;
+  while (node && node->key != key) {
+    parent = node;
+    if (node->key > key) {
+      node = node->left;
+    } else {
+      node = node->right;
+    }
+  }
+
+  if (node) {			// found
+    return node;
+  } else {			// not found
+    // parent can be last pos searched
+    return NULL;
+  }
+}
+
+rb_node* rb_insert_fixup(rb_node* root, rb_node* node) {
+  if (!node) {
+    return NULL;
+  }
+
+  // always assume inserted node is red
+  node->color = RED;
+
+  rb_node* parent = node->parent;
+  while (parent->color == RED) {
+    /*   set color
+           gparent                          gparent = red
+	  /       \                        /       \
+	parent(R)  uncle(R)   =>        parent(B)  uncle(B)
+        /                               /  
+      node(R)                         node(R)   
+    */
+    /*    first left rotate parent
+            gparent                            gparent
+	    /     \                            /     \
+       parent(R) uncle(B)     =>            node(R)  uncle(B)
+            \                               /
+           node(R)                      parent(R)
+     */
+    /*     set color and right rotate gparent
+	     gparent(R)                       node(B)
+             /     \                         /       \
+	  node(B)  uncle(B)   =>         parent(R)  gparent(R)
+	   /                                            \
+	parent(R)                                      uncle(B)
+     */
+    if (parent->parent->left == node->parent) {
+      rb_node* uncle = parent->parent->right;
+      if (uncle->color == RED) { // node/parent/uncle are all red
+	parent->color = BLACK, uncle->color = BLACK;
+	parent->parent->color = RED; // set gparent red
+	node = parent->parent;	     // always track red node
+      } else if (parent->right == node) { // node:red parent: red uncle: black
+	node = parent;
+	rb_rotate_left(root, node);
+	node->parent->color = BLACK;
+	node->parent->parent->color = RED;
+	// why is right?
+	rb_rotate_right(root, node->parent->parent);
+      }
+    } else {
+      rb_node* uncle = parent->parent->left;
+      if (uncle->color = RED) {
+	// same like before
+	parent->color = BLACK, uncle->color = BLACK;
+	parent->parent->color = RED; // set gparent red
+	node = parent->parent;	     // always track red node
+      } else if (parent->left == node) {
+	node = parent;
+	rb_rotate_right(root, node);
+	node->parent->color = BLACK;
+	node->parent->parent->color = RED;
+	// todo(bjcheny): some issue
+	rb_rotate_left(root, node->parent->parent);
+      }
+    }
+  }
+
+  root->color = BLACK;
+}
+
+rb_node* rb_insert(rb_node* root, rb_node* node) {
+  rb_node* p = root, *parent = NULL;
+  while (p) {
+    parent = p;
+    if (p->key > node->key) {
+      p = p->left;
+    } else {
+      p = p->right;
+    }
+  }
+
+  node->parent = parent;
+
+  if (!parent) {
+    root = node;
+  } else {
+    if (parent->key > node->key) {
+      parent->left = node;
+    } else {
+      parent->right = node;
+    }
+  }
+
+  node->left = NULL, node->right = NULL;
+  node->color = RED;
+
+  rb_insert_fixup(root, node);
+}
 
 int main(int, char**) {
   return 0;

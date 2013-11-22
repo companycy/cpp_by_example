@@ -61,7 +61,7 @@ list_node* del(list_node* root, int value) {
   return root;
 }
 
-list_node* clear(list_node* root) {
+void clear(list_node* root) {
   list_node* node = root;
   while (node) {
     list_node* next = node->next;
@@ -122,6 +122,7 @@ int main(int, char**) {
     print(root);
 
     clear(root);
+    print(root);
   }
 
   return 0;
