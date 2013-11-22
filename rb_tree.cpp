@@ -12,10 +12,29 @@ struct rb_node {
   int      color;
 };
 
+
+
 /*
-      node                right
+from algorithm:
+left_rotate(T, x):
+    y = right[x]
+    
+    right[x] = left[y]
+    p[left[y]] = x
+    if p[x] == null
+        y = root[T]
+    else if x == left[p[node]]
+        left[p[x]] = y
+    else
+        right[p[x]] = y
+
+    left[y] = x
+    p[x] = y
+*/
+/*
+       x                    y
      /    \               /   \
-    a     right   =>    node   c
+    a       y     =>     x     c
           /   \         /  \
          b     c       a    b
 
@@ -43,10 +62,28 @@ rb_node* rb_rotate_left(rb_node* root, rb_node* node) {
   return root;
 }
 
+
 /*
-       node                     left
+right_rotate(T, x):
+    y = left[x]
+
+    p[right[y]] = x
+    left[x] = right[y]
+
+    if p[x] == null
+        root = y
+    else if x == left[p[x]]:
+        left[p[x]] = y
+    else
+        right[p[x]] = y
+
+    p[y] = p[x]
+    p[x] = y
+*/
+/*
+        x                        y
       /    \                   /    \
-    left    c      =>         a     node
+      y     c      =>         a      x
     /  \                            /  \
    a    b                          b    c
 
@@ -93,6 +130,24 @@ rb_node* rb_search_auxiliary(int key, rb_node* root) {
   }
 }
 
+
+/*
+while color[p[z]] == RED
+    if p[z] = left[p[p[z]]]
+        y = right[p[p[z]]]
+        if color[y] == RED
+	   color[y] = color[p[z]] = BLACK
+	   color[p[p[z]]] = RED
+	else if z == right[p[z]]
+	   z = p[z]
+	   left_rotate(T, z)
+	   color[p[z]] = BLACK
+	   color[p[p[z]]] = RED
+	   right_rotate(T, p[p[z]])
+	else??
+
+color[root] = BLACK
+*/
 rb_node* rb_insert_fixup(rb_node* root, rb_node* node) {
   if (!node) {
     return NULL;
@@ -135,7 +190,6 @@ rb_node* rb_insert_fixup(rb_node* root, rb_node* node) {
 	rb_rotate_left(root, node);
 	node->parent->color = BLACK;
 	node->parent->parent->color = RED;
-	// why is right?
 	rb_rotate_right(root, node->parent->parent);
       }
     } else {
@@ -158,6 +212,32 @@ rb_node* rb_insert_fixup(rb_node* root, rb_node* node) {
 
   root->color = BLACK;
 }
+
+/*
+  rb_insert(T, z):
+     y = null
+     x = root(T)
+
+     while x != null
+         y = x
+	 if key[z] < key[x]
+	    x = left[x]
+	 else
+	    x = right[x]
+
+     p[z] = y
+
+     if y == null
+         root(T) = z
+     else if key[z] < key[y]
+         left[y] = z
+     else
+         right[y] = z
+
+     left[z] = right[z] = null
+     color[z] = red
+     rb_insert_fixup(T, z)
+*/
 
 rb_node* rb_insert(rb_node* root, rb_node* node) {
   rb_node* p = root, *parent = NULL;
