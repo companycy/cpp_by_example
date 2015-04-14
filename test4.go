@@ -20,24 +20,26 @@ import (
 *
 **********************************************************************************/
 
-
 func can_get_last(l []int) (bool) {
+    max := 0
     for i := 0; i < len(l); i++ {
-        if l[i] <= 0 {
-            return false
-        } else if l[i] >= (len(l) - i) {
+        if max < l[i] + i {
+            max = l[i] + i
+        }
+        if max > len(l) {
             return true
-        } else {
-            // do nothing
+        } else if l[i] <= 0 {
+            if max <= i {
+                return false
+            }
         }
     }
     return false
 }
 
-
 func main() {
-    // l := []int{2,3,1,1,4}
-    l := []int{3,2,1,0,4}
+    l := []int{2,3,1,1,4}
+    // l := []int{3,2,1,0,4}
 
     if can_get_last(l) {
         fmt.Println("success")
