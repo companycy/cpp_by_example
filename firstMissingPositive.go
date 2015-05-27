@@ -18,21 +18,35 @@ import (
 )
 
 func getMissingPositiveInt(l []int) int {
-    var t int
-    for i := range l {
-        t = l[l[i]]
-        l[l[i]] = l[i]
+    // var t int
+    for i := 0; i < len(l); i++ {
+        if l[i] <= 0 || i == l[i]-1 {
+
+        } else {
+            for l[i] > 0 && i != l[i]-1 {
+                if l[i]-1 >= len(l) {
+                    continue
+                }
+                t := l[l[i]-1]
+                l[l[i]-1] = l[i]
+                l[i] = t
+            }
+            // i++
+        }
     }
 
-    for i := 1; i < len(l); i++ {
-
+    for i := 0; i < len(l); i++ {
+        if l[i] != i+1 {
+            return i + 1
+        }
     }
+    return len(l) + 1
 }
 
 func main() {
     l := []int{
-        1, 2, 0,
-        // 3, 4, -1, 1,
+        // 1, 2, 0,
+        3, 4, -1, 1,
     }
 
     i := getMissingPositiveInt(l)
